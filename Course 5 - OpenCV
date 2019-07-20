@@ -1,0 +1,75 @@
+import zipfile
+
+from PIL import Image
+import pytesseract
+import cv2 as cv
+import numpy as np
+from PIL import ImageDraw
+import math 
+
+# loading the face detection classifier
+face_cascade = cv.CascadeClassifier('readonly/haarcascade_frontalface_default.xml')
+
+# the rest is up to you!
+tlist = {}
+img_names = []
+faces = {}
+search_name = 'Christopher'
+
+# creating final crop
+def final_crop_faces(img_faces, img_name, images):
+    
+    print('Results find in file' + img_name)
+    # no faces located
+    if len(img_faces) == 0:
+        print('But there were no faces in that file!')
+    else:        
+        contact_sheet = Image.new(images[img_name][0].mode, (500,100*math.ceil(np.ceil(len(img_faces)/5))))
+        x = 0
+        y = 0
+        for face in img_faces:
+
+            face.thumbnail((100,100))
+            contact_sheet.paste(face, (x, y))
+            if x+100 == contact_sheet.width:
+                x=0
+                y+=100
+            else:
+                x+=100
+
+        display(contact_sheet)
+
+    
+# unzipping the images
+def unzip_images(zip_name):
+    images = {}
+    objzip = zipfile.ZipFile(zip_name, 'r')
+    for infof in objzip.infolist():
+        images[infof.filename] = [Image.open(objzip.open(infof.filename))]
+        img_names.append(infof.filename)
+    return images
+
+if __name__ == "__main__":
+    
+    images = unzip_images('readonly/small_img.zip')
+    cont = 0    
+    for img_name in img_names: 
+        
+        #display(images[img_name][0])
+        tlist[img_name] = pytesseract.image_to_string(images[img_name][0]) 
+        # print(tlist[img_name])
+        if search_name in tlist[img_name]:
+
+                    #drawing = ImageDraw.Draw(images[img_name][0])
+                    #cv_img_bin=cv.threshold(np.array(images[img_name][0]),120,255,cv.THRESH_BINARY)[1] 
+            faces[img_name] = face_cascade.detectMultiScale(np.array(images[img_name][0]), 1.35) 
+            img_faces = []
+                         # lets mark faces
+            for x,y,w,h in faces[img_name]:
+                img_faces.append(images[img_name][0].crop((x,y,x+w,y+h)))
+                        #drawing.rectangle((x,y,x+w,y+h),outline="red")
+                       #images.append(face)
+
+                    # display(images[img_name][0])
+                    # print(faces[img_name])
+            final_crop_faces(img_faces, img_name, images)

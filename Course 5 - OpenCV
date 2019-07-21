@@ -14,12 +14,12 @@ face_cascade = cv.CascadeClassifier('readonly/haarcascade_frontalface_default.xm
 tlist = {}
 img_names = []
 faces = {}
-search_name = 'Christopher'
+search_name = 'Mark'
 
 # creating final crop
 def final_crop_faces(img_faces, img_name, images):
     
-    print('Results find in file' + img_name)
+    print('Results find in file ' + img_name)
     # no faces located
     if len(img_faces) == 0:
         print('But there were no faces in that file!')
@@ -49,9 +49,10 @@ def unzip_images(zip_name):
         img_names.append(infof.filename)
     return images
 
+# main
 if __name__ == "__main__":
     
-    images = unzip_images('readonly/small_img.zip')
+    images = unzip_images('readonly/images.zip')
     cont = 0    
     for img_name in img_names: 
         
@@ -62,9 +63,11 @@ if __name__ == "__main__":
 
                     #drawing = ImageDraw.Draw(images[img_name][0])
                     #cv_img_bin=cv.threshold(np.array(images[img_name][0]),120,255,cv.THRESH_BINARY)[1] 
-            faces[img_name] = face_cascade.detectMultiScale(np.array(images[img_name][0]), 1.35) 
+            # for 'Chritopher' example and small_img.zip
+            faces[img_name] = face_cascade.detectMultiScale(np.array(images[img_name][0]), 1.35, 4) 
+            # for 'Mark' example and images.zip
             img_faces = []
-                         # lets mark faces
+            # croping faces
             for x,y,w,h in faces[img_name]:
                 img_faces.append(images[img_name][0].crop((x,y,x+w,y+h)))
                         #drawing.rectangle((x,y,x+w,y+h),outline="red")
